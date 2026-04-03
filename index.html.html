@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Q-Commerce Service Recovery Survey | IIT Mandi</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131c;
+    --surface2: #1c1c2a;
+    --border: rgba(255,255,255,0.07);
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --success: #43e97b;
+    --warning: #f7971e;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── background noise texture ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ── gradient orbs ── */
+  .orb {
+    position: fixed; border-radius: 50%; filter: blur(100px);
+    opacity: 0.15; pointer-events: none; z-index: 0;
+  }
+  .orb-1 { width: 600px; height: 600px; background: var(--accent); top: -200px; right: -200px; }
+  .orb-2 { width: 400px; height: 400px; background: var(--accent2); bottom: -100px; left: -100px; }
+
+  .wrapper {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative; z-index: 1;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 60px 0 48px;
+  }
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(108,99,255,0.2), rgba(255,101,132,0.2));
+    border: 1px solid rgba(108,99,255,0.4);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a09eff;
+    margin-bottom: 20px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 40%, #a09eff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    max-width: 500px;
+    margin: 0 auto 28px;
+  }
+
+  /* progress bar */
+  .progress-wrap {
+    background: var(--surface2);
+    border-radius: 100px;
+    height: 4px;
+    max-width: 320px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .progress-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Section cards ── */
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.4s ease forwards;
+    display: none;
+  }
+  .section-card.visible { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .section-label.demo  { color: #43e97b; }
+  .section-label.gate  { color: #f7971e; }
+  .section-label.success { color: #6c63ff; }
+  .section-label.failure { color: #ff6584; }
+  .section-label.universal { color: #56cfe1; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Form elements ── */
+  .field { margin-bottom: 28px; }
+
+  label.field-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+  label.field-label .var-tag {
+    display: inline-block;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 7px;
+    color: #a09eff;
+    font-family: monospace;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .field-label .req { color: var(--accent2); margin-left: 2px; }
+
+  /* select */
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b80' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+  }
+
+  /* radio / checkbox grid */
+  .radio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+  }
+  .radio-grid.full { grid-template-columns: 1fr; }
+
+  .radio-opt {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 13px;
+  }
+  .radio-opt:hover { border-color: rgba(108,99,255,0.4); }
+  .radio-opt input { display: none; }
+  .radio-dot {
+    width: 16px; height: 16px; flex-shrink: 0;
+    border: 2px solid var(--muted);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s;
+  }
+  .radio-opt.selected {
+    border-color: var(--accent);
+    background: rgba(108,99,255,0.08);
+  }
+  .radio-opt.selected .radio-dot {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+  .radio-opt.selected .radio-dot::after {
+    content: '';
+    width: 6px; height: 6px;
+    background: #fff; border-radius: 50%;
+  }
+
+  /* Likert scale */
+  .likert-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .likert-q { margin-bottom: 20px; }
+  .likert-q:last-child { margin-bottom: 0; }
+  .likert-q-text {
+    font-size: 13.5px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .likert-q-text .var-tag {
+    display: inline-block;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    color: #a09eff;
+    font-family: monospace;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .likert-scale {
+    display: flex; gap: 6px;
+    align-items: center;
+  }
+  .scale-labels {
+    display: flex; justify-content: space-between;
+    font-size: 10px; color: var(--muted);
+    margin-top: 6px;
+    padding: 0 2px;
+  }
+  .scale-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .scale-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .scale-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(108,99,255,0.4);
+  }
+
+  /* path badge */
+  .path-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  .path-badge.success-badge {
+    background: rgba(67,233,123,0.1);
+    border: 1px solid rgba(67,233,123,0.3);
+    color: #43e97b;
+  }
+  .path-badge.failure-badge {
+    background: rgba(255,101,132,0.1);
+    border: 1px solid rgba(255,101,132,0.3);
+    color: #ff6584;
+  }
+
+  /* ── Navigation buttons ── */
+  .nav-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 32px; gap: 12px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 10px;
+    padding: 13px 26px;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-ghost {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #9b59b6);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(108,99,255,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(108,99,255,0.45); }
+  .btn-primary:active { transform: none; }
+  .btn-submit {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    color: #0a0a0f;
+    box-shadow: 0 4px 20px rgba(67,233,123,0.3);
+  }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(67,233,123,0.4); }
+
+  /* ── Success screen ── */
+  #success-screen {
+    display: none;
+    text-align: center;
+    padding: 80px 20px;
+    animation: fadeUp 0.5s ease forwards;
+  }
+  .success-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, rgba(67,233,123,0.2), rgba(56,249,215,0.2));
+    border: 1px solid rgba(67,233,123,0.4);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 28px;
+    font-size: 36px;
+  }
+  .success-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ── Error toast ── */
+  #toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #ff4757;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 1000;
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    white-space: nowrap;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── Loading spinner ── */
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  input[type="text"], input[type="email"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus, input[type="email"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+  }
+</style>
+</head>
+<body>
+
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div id="toast">⚠ Please answer all questions before proceeding.</div>
+
+<div class="wrapper">
+
+  <!-- ── HEADER ── -->
+  <div class="header" id="main-header">
+    <div class="badge">IIT Mandi · MB535</div>
+    <h1>Q-Commerce Service Recovery Survey</h1>
+    <p class="subtitle">How do Indian Q-commerce platforms handle failures — and does great recovery create stronger loyalty?</p>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Step 1 of 5</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 1 — DEMOGRAPHICS
+  ═══════════════════════════════════════════════════ -->
+  <div class="section-card visible" id="sec-demo">
+    <div class="section-label demo">Section 1</div>
+    <div class="section-title">Demographics & Usage</div>
+    <p class="section-desc">Tell us a bit about yourself and your Q-commerce habits. All responses are strictly confidential and used only for academic research.</p>
+
+    <div class="field">
+      <label class="field-label">Full Name <span class="req">*</span></label>
+      <input type="text" id="f_name" placeholder="Your name" />
+    </div>
+
+    <div class="field">
+      <label class="field-label">Email Address <span class="req">*</span></label>
+      <input type="email" id="f_email" placeholder="your@email.com" />
+    </div>
+
+    <div class="field">
+      <label class="field-label">Age Group <span class="req">*</span></label>
+      <div class="radio-grid" data-name="age">
+        <label class="radio-opt"><input type="radio" name="age" value="18-24"><div class="radio-dot"></div>18–24</label>
+        <label class="radio-opt"><input type="radio" name="age" value="25-34"><div class="radio-dot"></div>25–34</label>
+        <label class="radio-opt"><input type="radio" name="age" value="35-44"><div class="radio-dot"></div>35–44</label>
+        <label class="radio-opt"><input type="radio" name="age" value="45+"><div class="radio-dot"></div>45+</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Profession <span class="req">*</span></label>
+      <select id="f_profession">
+        <option value="">Select...</option>
+        <option>Student</option>
+        <option>Working Professional</option>
+        <option>Business Owner</option>
+        <option>Government Employee</option>
+        <option>Other</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field-label">City Tier <span class="req">*</span></label>
+      <div class="radio-grid" data-name="city">
+        <label class="radio-opt"><input type="radio" name="city" value="Metro"><div class="radio-dot"></div>Metro (Delhi, Mumbai…)</label>
+        <label class="radio-opt"><input type="radio" name="city" value="Tier 1"><div class="radio-dot"></div>Tier-1 (Pune, Ahmedabad…)</label>
+        <label class="radio-opt"><input type="radio" name="city" value="Tier 2"><div class="radio-dot"></div>Tier-2/3 City</label>
+        <label class="radio-opt"><input type="radio" name="city" value="Campus"><div class="radio-dot"></div>Campus (IIT, NIT…)</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Primary Q-Commerce App <span class="req">*</span></label>
+      <div class="radio-grid" data-name="app">
+        <label class="radio-opt"><input type="radio" name="app" value="Blinkit"><div class="radio-dot"></div>Blinkit</label>
+        <label class="radio-opt"><input type="radio" name="app" value="Zepto"><div class="radio-dot"></div>Zepto</label>
+        <label class="radio-opt"><input type="radio" name="app" value="Swiggy Instamart"><div class="radio-dot"></div>Swiggy Instamart</label>
+        <label class="radio-opt"><input type="radio" name="app" value="BigBasket Now"><div class="radio-dot"></div>BigBasket Now</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Order Frequency <span class="req">*</span></label>
+      <div class="radio-grid" data-name="frequency">
+        <label class="radio-opt"><input type="radio" name="frequency" value="Daily"><div class="radio-dot"></div>Daily</label>
+        <label class="radio-opt"><input type="radio" name="frequency" value="2-3 times a week"><div class="radio-dot"></div>2–3×/week</label>
+        <label class="radio-opt"><input type="radio" name="frequency" value="Weekly"><div class="radio-dot"></div>Weekly</label>
+        <label class="radio-opt"><input type="radio" name="frequency" value="Monthly"><div class="radio-dot"></div>Monthly</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Nature of Most Recent Issue <span class="req">*</span></label>
+      <div class="radio-grid" data-name="issue_type">
+        <label class="radio-opt"><input type="radio" name="issue_type" value="Late Delivery"><div class="radio-dot"></div>Late Delivery</label>
+        <label class="radio-opt"><input type="radio" name="issue_type" value="Missing Item"><div class="radio-dot"></div>Missing Item</label>
+        <label class="radio-opt"><input type="radio" name="issue_type" value="Damaged Product"><div class="radio-dot"></div>Damaged Product</label>
+        <label class="radio-opt"><input type="radio" name="issue_type" value="Wrong Item"><div class="radio-dot"></div>Wrong Item</label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label">Approximate Order Value <span class="req">*</span></label>
+      <div class="radio-grid" data-name="order_value">
+        <label class="radio-opt"><input type="radio" name="order_value" value="Under ₹200"><div class="radio-dot"></div>Under ₹200</label>
+        <label class="radio-opt"><input type="radio" name="order_value" value="₹200-₹500"><div class="radio-dot"></div>₹200–₹500</label>
+        <label class="radio-opt"><input type="radio" name="order_value" value="₹500-₹1000"><div class="radio-dot"></div>₹500–₹1000</label>
+        <label class="radio-opt"><input type="radio" name="order_value" value="Above ₹1000"><div class="radio-dot"></div>Above ₹1000</label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <span></span>
+      <button class="btn btn-primary" onclick="goTo('sec-gate', 2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 2 — LOGIC GATE
+  ═══════════════════════════════════════════════════ -->
+  <div class="section-card" id="sec-gate">
+    <div class="section-label gate">Section 2</div>
+    <div class="section-title">The Branching Gate</div>
+    <p class="section-desc">Your answer below will direct you to the relevant set of questions. Think about your most recent complaint experience.</p>
+
+    <div class="field">
+      <label class="field-label">How would you rate the final outcome of your complaint resolution? <span class="req">*</span></label>
+      <div class="radio-grid full" data-name="gate">
+        <label class="radio-opt" id="gate-success-opt"><input type="radio" name="gate" value="Option A : Completely / Mostly Satisfied"><div class="radio-dot"></div>✅ Completely / Mostly Satisfied — the platform resolved my issue well</label>
+        <label class="radio-opt" id="gate-failure-opt"><input type="radio" name="gate" value="Option B: Dissatisfied / Still Unresolved"><div class="radio-dot"></div>❌ Dissatisfied / Still Unresolved — my complaint was not handled properly</label>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="goTo('sec-demo', 1)">← Back</button>
+      <button class="btn btn-primary" onclick="routeGate()">Next →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 3 — SUCCESS PATH
+  ═══════════════════════════════════════════════════ -->
+  <div class="section-card" id="sec-success">
+    <div class="section-label success">Section 3</div>
+    <div class="section-title">Recovery Success Experience</div>
+    <div class="path-badge success-badge">🚀 Success Path — Recovery Paradox Focus</div>
+    <p class="section-desc">Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree). Think about your resolved complaint experience.</p>
+
+    <div class="likert-wrap" id="success-likert">
+      <!-- JS-generated -->
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="goTo('sec-gate', 2)">← Back</button>
+      <button class="btn btn-primary" onclick="goTo('sec-universal', 5)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 4 — FAILURE PATH
+  ═══════════════════════════════════════════════════ -->
+  <div class="section-card" id="sec-failure">
+    <div class="section-label failure">Section 4</div>
+    <div class="section-title">Recovery Failure Experience</div>
+    <div class="path-badge failure-badge">⚠ Failure Path — Interactional Justice & Churn Focus</div>
+    <p class="section-desc">Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree). Think about your unresolved complaint experience.</p>
+
+    <div class="likert-wrap" id="failure-likert">
+      <!-- JS-generated -->
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="goTo('sec-gate', 2)">← Back</button>
+      <button class="btn btn-primary" onclick="goTo('sec-universal', 5)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 5 — UNIVERSAL
+  ═══════════════════════════════════════════════════ -->
+  <div class="section-card" id="sec-universal">
+    <div class="section-label universal">Section 5</div>
+    <div class="section-title">Universal Final Questions</div>
+    <p class="section-desc">These 4 questions apply to all respondents regardless of your path. Rate from 1 (Strongly Disagree) to 5 (Strongly Agree).</p>
+
+    <div class="likert-wrap" id="universal-likert">
+      <!-- JS-generated -->
+    </div>
+
+    <div class="nav-row">
+      <button class="btn btn-ghost" onclick="backFromUniversal()">← Back</button>
+      <button class="btn btn-submit" id="submit-btn" onclick="submitForm()">
+        <span id="submit-label">Submit Response</span>
+        <div class="spinner" id="submit-spinner"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS SCREEN ── -->
+  <div id="success-screen">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Thank you!</div>
+    <p style="color:var(--muted); max-width:400px; margin:0 auto; font-size:14px;">
+      Your response has been recorded. This research will contribute to improving service recovery practices across Indian Q-commerce platforms.<br><br>
+      <strong style="color:var(--text);">IIT Mandi · School of Management · MB535</strong>
+    </p>
+  </div>
+
+</div><!-- /wrapper -->
+
+<!-- ════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════ -->
+<script>
+// ── CONFIG — Replace with your Apps Script URL ──
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwus5C1K2SscESmQQp0rcmcABbrRPdEcj8Hg8LfWqswsbX3wdxPyk7Q-46UKMgBA7Eacg/exec';
+
+// ── DATA DEFINITIONS ──
+const successQuestions = [
+  { id: 'dj_1',  text: 'The resolution provided was fair given the trouble I faced.' },
+  { id: 'pj_1',  text: 'The speed of the refund/fix exceeded my expectations.' },
+  { id: 'srp_1', text: 'I feel more loyal to this app now than before the issue occurred.' },
+  { id: 'ij_1',  text: 'The "Self-Help" chatbot was effective in solving my problem.' },
+  { id: 'pi_1',  text: 'I would go out of my way to praise this app to others.' },
+  { id: 'dj_2',  text: 'The compensation offered (coupon/refund) was appropriate.' },
+  { id: 'tr_1',  text: "I trust the app's system to fix any future errors." },
+  { id: 'pj_2',  text: 'Reporting the issue took very little effort.' },
+  { id: 'bs_1',  text: 'The brand showed they value my business.' },
+  { id: 'pi_2',  text: 'I will continue using this app as my primary choice.' },
+];
+
+const failureQuestions = [
+  { id: 'ij_2',  text: 'The resolution process felt like an "endless loop" of automated replies.' },
+  { id: 'si_1',  text: 'I am likely to switch to a competitor after this experience.' },
+  { id: 'ij_3',  text: 'The customer support agent/bot was cold and impersonal.' },
+  { id: 'pj_3',  text: 'I had to repeat my problem multiple times to get any attention.' },
+  { id: 'dj_3',  text: 'The compensation offered was insulting compared to the inconvenience.' },
+  { id: 'pi_3',  text: 'I have shared my negative experience with friends or family.' },
+  { id: 'pj_4',  text: 'The app made it difficult to find the "Help" section.' },
+  { id: 'bs_2',  text: 'I feel the app does not care about retaining me as a customer.' },
+  { id: 'ij_4',  text: "The delivery partner's behavior made the situation worse." },
+  { id: 'si_2',  text: 'I will actively avoid using this app in the future.' },
+];
+
+const universalQuestions = [
+  { id: 'tr_2',  text: 'Overall, I consider this Q-commerce brand to be reliable.' },
+  { id: 'val_1', text: 'Despite any issues, I find the 10-minute delivery model essential.' },
+  { id: 'fai_1', text: 'I believe this platform treats its customers fairly.' },
+  { id: 'pi_4',  text: 'I intend to use a Q-commerce app in the next 7 days.' },
+];
+
+// ── STATE ──
+let currentPath = null; // 'success' | 'failure'
+
+// ── BUILD LIKERT SECTIONS ──
+function buildLikert(containerId, questions) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  questions.forEach((q, idx) => {
+    const div = document.createElement('div');
+    div.className = 'likert-q';
+    div.innerHTML = `
+      <div class="likert-q-text">
+        <span class="var-tag">${q.id}</span>${idx + 1}. ${q.text}
+      </div>
+      <div class="likert-scale" id="scale-${q.id}">
+        ${[1,2,3,4,5].map(n => `<div class="scale-btn" data-var="${q.id}" data-val="${n}" onclick="selectScale(this)">${n}</div>`).join('')}
+      </div>
+      <div class="scale-labels">
+        <span>Strongly Disagree</span><span>Neutral</span><span>Strongly Agree</span>
+      </div>
+    `;
+    container.appendChild(div);
+    if (idx < questions.length - 1) {
+      const hr = document.createElement('div');
+      hr.className = 'divider';
+      container.appendChild(hr);
+    }
+  });
+}
+
+buildLikert('success-likert', successQuestions);
+buildLikert('failure-likert', failureQuestions);
+buildLikert('universal-likert', universalQuestions);
+
+// ── RADIO SELECT HIGHLIGHT ──
+document.querySelectorAll('.radio-grid').forEach(grid => {
+  grid.addEventListener('click', e => {
+    const opt = e.target.closest('.radio-opt');
+    if (!opt) return;
+    const name = grid.dataset.name;
+    grid.querySelectorAll('.radio-opt').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    opt.querySelector('input').checked = true;
+  });
+});
+
+// ── LIKERT SELECT ──
+function selectScale(btn) {
+  const varId = btn.dataset.var;
+  document.querySelectorAll(`[data-var="${varId}"]`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// ── PROGRESS ──
+function setProgress(step) {
+  const pct = ((step - 1) / 4) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Step ${step} of 5`;
+}
+
+// ── SECTION NAVIGATION ──
+function showSection(id) {
+  document.querySelectorAll('.section-card').forEach(s => {
+    s.classList.remove('visible');
+    s.style.display = 'none';
+  });
+  const target = document.getElementById(id);
+  target.style.display = 'block';
+  // force reflow for animation
+  void target.offsetWidth;
+  target.classList.add('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goTo(sectionId, step) {
+  if (!validateCurrent(sectionId)) return;
+  setProgress(step);
+  showSection(sectionId);
+}
+
+function routeGate() {
+  const gate = document.querySelector('input[name="gate"]:checked');
+  if (!gate) { showToast('Please select your complaint resolution outcome.'); return; }
+
+  if (gate.value.includes('Mostly Satisfied') || gate.value.includes('Completely')) {
+    currentPath = 'success';
+    setProgress(3);
+    showSection('sec-success');
+  } else {
+    currentPath = 'failure';
+    setProgress(4);
+    showSection('sec-failure');
+  }
+}
+
+function backFromUniversal() {
+  if (currentPath === 'success') { setProgress(3); showSection('sec-success'); }
+  else { setProgress(4); showSection('sec-failure'); }
+}
+
+// ── VALIDATION ──
+function validateCurrent(nextId) {
+  const currentCard = document.querySelector('.section-card.visible');
+  if (!currentCard) return true;
+
+  const cid = currentCard.id;
+
+  if (cid === 'sec-demo') {
+    const name = document.getElementById('f_name').value.trim();
+    const email = document.getElementById('f_email').value.trim();
+    if (!name || !email) { showToast('Please enter your name and email.'); return false; }
+    const radios = ['age','city','app','frequency','issue_type','order_value'];
+    for (const r of radios) {
+      if (!document.querySelector(`input[name="${r}"]:checked`)) {
+        showToast(`Please answer all questions before proceeding.`); return false;
+      }
+    }
+    const prof = document.getElementById('f_profession').value;
+    if (!prof) { showToast('Please select your profession.'); return false; }
+    return true;
+  }
+
+  if (cid === 'sec-success' || cid === 'sec-failure') {
+    const qs = cid === 'sec-success' ? successQuestions : failureQuestions;
+    for (const q of qs) {
+      if (!document.querySelector(`[data-var="${q.id}"].selected`)) {
+        showToast('Please rate all statements before proceeding.'); return false;
+      }
+    }
+    return true;
+  }
+
+  return true;
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '⚠ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── COLLECT FORM DATA ──
+function collectData() {
+  const d = {};
+  d.name        = document.getElementById('f_name').value.trim();
+  d.email       = document.getElementById('f_email').value.trim();
+  d.profession  = document.getElementById('f_profession').value;
+
+  ['age','city','app','frequency','issue_type','order_value','gate'].forEach(n => {
+    const el = document.querySelector(`input[name="${n}"]:checked`);
+    d[n] = el ? el.value : '';
+  });
+
+  // Likert values
+  const allQs = [...successQuestions, ...failureQuestions, ...universalQuestions];
+  allQs.forEach(q => {
+    const btn = document.querySelector(`[data-var="${q.id}"].selected`);
+    d[q.id] = btn ? btn.dataset.val : '';
+  });
+
+  d.path = currentPath;
+  d.timestamp = new Date().toISOString();
+  return d;
+}
+
+// ── SUBMIT ──
+async function submitForm() {
+  // validate universals
+  for (const q of universalQuestions) {
+    if (!document.querySelector(`[data-var="${q.id}"].selected`)) {
+      showToast('Please rate all statements before submitting.'); return;
+    }
+  }
+
+  const btn = document.getElementById('submit-btn');
+  document.getElementById('submit-label').textContent = 'Submitting…';
+  document.getElementById('submit-spinner').style.display = 'block';
+  btn.disabled = true;
+
+  const data = collectData();
+
+  try {
+    await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    showSuccessScreen();
+  } catch (err) {
+    // no-cors won't throw on success; only genuine network errors land here
+    showToast('Network error. Please check your connection and try again.');
+    document.getElementById('submit-label').textContent = 'Submit Response';
+    document.getElementById('submit-spinner').style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function showSuccessScreen() {
+  document.getElementById('main-header').style.display = 'none';
+  document.querySelectorAll('.section-card').forEach(s => s.style.display = 'none');
+  document.getElementById('success-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>
