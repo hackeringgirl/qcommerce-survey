@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Q-Commerce Service Recovery | IIT Mandi MBA Survey</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sage:        #5a7364;
+      --sage-light:  #7ba67b;
+      --sage-pale:   #edf2ed;
+      --sage-border: #c8d9c8;
+      --bg:          #faf9f6;
+      --card:        #ffffff;
+      --text:        #4a4a4a;
+      --text-light:  #787878;
+      --text-muted:  #a0a0a0;
+      --accent:      #3d5c50;
+      --warn:        #c0392b;
+      --radius:      12px;
+      --shadow:      0 2px 18px rgba(90,115,100,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── TOP BANNER ── */
+    .top-banner {
+      background: var(--sage);
+      color: #fff;
+      text-align: center;
+      padding: 10px 24px;
+      font-size: 0.85rem;
+      letter-spacing: 0.03em;
+      font-weight: 500;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--card);
+      border-bottom: 2px solid var(--sage-border);
+      padding: 36px 24px 32px;
+      text-align: center;
+    }
+    .institute-tag {
+      display: inline-block;
+      background: var(--sage-pale);
+      color: var(--sage);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 30px;
+      border: 1px solid var(--sage-border);
+      margin-bottom: 18px;
+    }
+    header h1 {
+      font-family: 'Lora', serif;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1.35;
+      max-width: 640px;
+      margin: 0 auto 10px;
+    }
+    header p {
+      font-size: 0.88rem;
+      color: var(--text-light);
+      max-width: 580px;
+      margin: 0 auto;
+    }
+
+    /* ── WRAPPER ── */
+    .wrapper {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-bar-wrap {
+      background: var(--sage-border);
+      border-radius: 99px;
+      height: 5px;
+      margin-bottom: 36px;
+      overflow: hidden;
+    }
+    #progress-fill {
+      height: 100%;
+      background: var(--sage);
+      border-radius: 99px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--sage-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 36px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 540px) {
+      .card { padding: 24px 18px; }
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .section-label .pill {
+      background: var(--sage);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 11px;
+      border-radius: 30px;
+      white-space: nowrap;
+    }
+    .section-label h2 {
+      font-family: 'Lora', serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .section-note {
+      font-size: 0.82rem;
+      color: var(--text-light);
+      background: var(--sage-pale);
+      border-left: 3px solid var(--sage-light);
+      padding: 10px 16px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 26px;
+      font-style: italic;
+    }
+
+    /* ── FORM FIELDS ── */
+    .field { margin-bottom: 22px; }
+    .field:last-child { margin-bottom: 0; }
+
+    label.field-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 7px;
+    }
+    label.field-label .opt { color: var(--text-muted); font-weight: 300; font-size: 0.78rem; }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--text);
+      background: #fff;
+      border: 1.5px solid var(--sage-border);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%235a7364' d='M8 11L2 5h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 14px;
+      padding-right: 34px;
+    }
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--sage);
+      box-shadow: 0 0 0 3px rgba(90,115,100,0.12);
+    }
+
+    /* ── LIKERT MATRIX ── */
+    .matrix-group { margin-bottom: 12px; }
+
+    .matrix-header {
+      display: grid;
+      grid-template-columns: 1fr repeat(5,44px);
+      gap: 4px;
+      padding: 8px 0 6px;
+      border-bottom: 1.5px solid var(--sage-border);
+      margin-bottom: 4px;
+    }
+    .matrix-header span {
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: var(--text-light);
+      text-align: center;
+      line-height: 1.3;
+      letter-spacing: 0.03em;
+    }
+    .matrix-header span:first-child { text-align: left; }
+
+    @media (max-width: 540px) {
+      .matrix-header { display: none; }
+    }
+
+    .matrix-row {
+      display: grid;
+      grid-template-columns: 1fr repeat(5,44px);
+      gap: 4px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0ede8;
+      transition: background 0.15s;
+    }
+    .matrix-row:hover { background: var(--sage-pale); border-radius: 6px; }
+    .matrix-row:last-child { border-bottom: none; }
+
+    .matrix-q-text {
+      font-size: 0.84rem;
+      color: var(--text);
+      padding-right: 10px;
+      line-height: 1.5;
+    }
+    .q-num {
+      font-weight: 500;
+      color: var(--sage);
+      margin-right: 5px;
+    }
+
+    .matrix-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+    }
+    .matrix-cell input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--sage-border);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.18s;
+      flex-shrink: 0;
+    }
+    .matrix-cell input[type="radio"]:checked {
+      background: var(--sage);
+      border-color: var(--sage);
+      box-shadow: inset 0 0 0 4px #fff;
+    }
+    .matrix-cell input[type="radio"]:hover:not(:checked) {
+      border-color: var(--sage-light);
+      background: var(--sage-pale);
+    }
+    .matrix-cell .mob-label {
+      display: none;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Mobile: stack rows */
+    @media (max-width: 540px) {
+      .matrix-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+        padding: 14px 0;
+      }
+      .radio-group-mobile {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 4px;
+      }
+      .matrix-cell { flex-direction: column; align-items: center; gap: 4px; }
+      .matrix-cell .mob-label { display: block; }
+    }
+
+    /* ── SUBSCALE DIVIDER ── */
+    .subscale-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 26px 0 16px;
+    }
+    .subscale-divider span {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--sage);
+      white-space: nowrap;
+    }
+    .subscale-divider::before,
+    .subscale-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--sage-border);
+    }
+
+    /* ── SUBMIT BUTTON ── */
+    .submit-wrap { text-align: center; margin-top: 12px; display: none; /* Hidden by default */ }
+    .btn-submit {
+      background: var(--sage);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 14px 52px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-submit:hover { background: var(--accent); transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .submit-note {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    /* ── THANK YOU ── */
+    #thank-you {
+      display: none;
+      text-align: center;
+      padding: 80px 24px;
+    }
+    .ty-icon {
+      width: 72px;
+      height: 72px;
+      background: var(--sage-pale);
+      border: 2px solid var(--sage-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .ty-icon svg { width: 32px; height: 32px; stroke: var(--sage); }
+    #thank-you h2 {
+      font-family: 'Lora', serif;
+      font-size: 1.7rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    #thank-you p {
+      color: var(--text-light);
+      font-size: 0.92rem;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--card);
+      border-top: 1px solid var(--sage-border);
+      text-align: center;
+      padding: 20px 24px;
+    }
+    footer p {
+      font-size: 0.73rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    footer strong { color: var(--text-light); font-weight: 500; }
+
+    /* ── VALIDATION ERROR ── */
+    .error-msg {
+      font-size: 0.76rem;
+      color: var(--warn);
+      margin-top: 5px;
+      display: none;
+    }
+    .field.has-error input,
+    .field.has-error select { border-color: var(--warn); }
+    .field.has-error .error-msg { display: block; }
+    .row-error { outline: 2px solid #f5c6c4; border-radius: 6px; }
+    
+    #screener-rejection {
+      display: none;
+      background: #fdf2f2;
+      border-left: 4px solid var(--warn);
+      padding: 15px;
+      margin-top: 15px;
+      color: var(--warn);
+      font-weight: 500;
+      font-size: 0.9rem;
+      border-radius: 4px;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <div class="top-banner">
+    <span>🔒 This academic survey is securely powered by Google Apps Script and hosted via GitHub Pages.</span>
+  </div>
+
+  <header>
+    <div class="institute-tag">IIT Mandi · MBA Marketing Research</div>
+    <h1>Q-Commerce Service Recovery:<br>Understanding Customer Experience</h1>
+    <p>Your responses are completely anonymous and will be used solely for academic research. The survey takes approximately <strong>5–7 minutes</strong> to complete.</p>
+  </header>
+
+  <div class="wrapper">
+
+    <div class="progress-bar-wrap"><div id="progress-fill"></div></div>
+
+    <form id="survey-form" novalidate>
+
+      <div class="card">
+        <div class="section-label">
+          <span class="pill">Part 1</span>
+          <h2>About You</h2>
+        </div>
+
+        <div class="field" id="field-Name">
+          <label class="field-label" for="Name">Full Name <span class="opt">(Optional)</span></label>
+          <input type="text" id="Name" name="Name" placeholder="e.g., Priya Sharma" autocomplete="name" />
+        </div>
+
+        <div class="field" id="field-Age">
+          <label class="field-label" for="Age">Age Group <span style="color:var(--warn)">*</span></label>
+          <select id="Age" name="Age" required>
+            <option value="" disabled selected>— Select your age group —</option>
+            <option value="18-24">18 – 24 years</option>
+            <option value="25-34">25 – 34 years</option>
+            <option value="35-44">35 – 44 years</option>
+            <option value="45+">45 years and above</option>
+          </select>
+          <div class="error-msg">Please select your age group.</div>
+        </div>
+
+        <div class="field" id="field-City">
+          <label class="field-label" for="City">City Tier <span style="color:var(--warn)">*</span></label>
+          <select id="City" name="City" required>
+            <option value="" disabled selected>— Select your city tier —</option>
+            <option value="Tier 1">Tier 1 (e.g., Mumbai, Delhi, Bengaluru, Chennai)</option>
+            <option value="Tier 2">Tier 2 (e.g., Jaipur, Lucknow, Chandigarh, Indore)</option>
+            <option value="Tier 3">Tier 3 (e.g., Mandi, Shimla, smaller towns)</option>
+            <option value="Others">Others / Rural areas</option>
+          </select>
+          <div class="error-msg">Please select your city tier.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-label">
+          <span class="pill">Part 2</span>
+          <h2>Recent App Experience</h2>
+        </div>
+        <div class="section-note">
+          This helps us confirm you have recent experience with quick-commerce delivery apps.
+        </div>
+
+        <div class="field" id="field-Recent_Usage">
+          <label class="field-label" for="Recent_Usage">
+            Which of the following apps have you used in the past 3 to 6 months? <span style="color:var(--warn)">*</span>
+          </label>
+          <select id="Recent_Usage" name="Recent_Usage" required>
+            <option value="" disabled selected>— Select your answer —</option>
+            <option value="Zepto, Blinkit, or Swiggy Instamart">Zepto, Blinkit, or Swiggy Instamart</option>
+            <option value="Other delivery apps">Other quick delivery apps (e.g., Dunzo, BigBasket Now)</option>
+            <option value="I haven't used quick delivery apps recently">I haven't used quick delivery apps recently</option>
+          </select>
+          <div class="error-msg">Please select an option to continue.</div>
+        </div>
+        
+        <div class="field" id="field-Failure_Experience">
+          <label class="field-label" for="Failure_Experience">
+            During this time, did you experience any service issues (e.g., late delivery, missing/damaged items) and contact their customer support? <span style="color:var(--warn)">*</span>
+          </label>
+          <select id="Failure_Experience" name="Failure_Experience" required>
+            <option value="" disabled selected>— Select your answer —</option>
+            <option value="Yes, experienced issue AND contacted support">Yes, experienced an issue AND contacted support</option>
+            <option value="Yes, experienced issue but DID NOT contact support">Yes, experienced an issue but DID NOT contact support</option>
+            <option value="No, I have not experienced any issues">No, I have not experienced any issues</option>
+          </select>
+          <div class="error-msg">Please select an option to continue.</div>
+        </div>
+        
+        <div id="screener-rejection">
+            Thank you for your time. This specific academic study requires participants who have recently experienced a service failure and interacted with customer support. You may close this tab.
+        </div>
+      </div>
+
+      <div class="card" id="likert-card" style="display: none;">
+        <div class="section-label">
+          <span class="pill">Part 3</span>
+          <h2>Your Experience with Service Recovery</h2>
+        </div>
+        <div class="section-note">
+          Think of a recent instance where something went wrong with a Q-commerce order (e.g., wrong item, late delivery, missing product) and the app tried to resolve it. Rate each statement below from <strong>1 (Strongly Disagree)</strong> to <strong>5 (Strongly Agree)</strong>.
+        </div>
+
+        <div id="likert-container">
+          </div>
+      </div>
+
+      <div class="submit-wrap" id="submit-section">
+        <button type="submit" class="btn-submit" id="submit-btn">Submit My Response</button>
+        <p class="submit-note">Your data is anonymous and used for academic purposes only.</p>
+      </div>
+
+    </form>
+
+    <div id="thank-you">
+      <div class="ty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2>Thank You for Participating!</h2>
+      <p>Your response has been successfully recorded. Your time and insights are greatly appreciated and will contribute meaningfully to this academic study.</p>
+    </div>
+
+  </div><footer>
+    <p>
+      <strong>IIT Mandi — MBA Marketing Research Project</strong><br>
+      All responses are collected anonymously and securely via Google Apps Script.<br>
+      This survey is hosted on GitHub Pages and is for academic use only. · 2026
+    </p>
+  </footer>
+
+  <script>
+  // ── QUESTION DEFINITIONS ──────────────────────────────────────────────────
+
+  const subscales = [
+    {
+      label: "Distributive Justice",
+      questions: [
+        { id: "DJ_1", text: "The resolution I received from the Q-commerce app was fair." },
+        { id: "DJ_2", text: "The compensation offered met my needs adequately." },
+        { id: "DJ_3", text: "The outcome I received was appropriate given the problem I experienced." },
+        { id: "DJ_4", text: "Overall, I got what I deserved from the response to my complaint." },
+      ]
+    },
+    {
+      label: "Procedural Justice",
+      questions: [
+        { id: "PJ_1", text: "The app responded to my complaint in a timely manner." },
+        { id: "PJ_2", text: "The app gave me the opportunity to explain my problem fully." },
+        { id: "PJ_3", text: "The complaint-handling process was easy to access and navigate." },
+        { id: "PJ_4", text: "The app followed a consistent and transparent procedure." },
+      ]
+    },
+    {
+      label: "Interactional Justice",
+      questions: [
+        { id: "IJ_1", text: "The app representative (or automated system) treated me with politeness and respect." },
+        { id: "IJ_2", text: "The representative showed genuine concern for my problem." },
+        { id: "IJ_3", text: "I was provided with a clear explanation for why the problem occurred." },
+        { id: "IJ_4", text: "Sincere effort was put into resolving my complaint." },
+      ]
+    },
+    {
+      label: "Service Recovery Satisfaction",
+      questions: [
+        { id: "SRS_1", text: "I was satisfied with the way the app handled my complaint." },
+        { id: "SRS_2", text: "The recovery effort met my expectations for resolving the problem." },
+        { id: "SRS_3", text: "Overall, I had a positive experience when the app responded." },
+        { id: "SRS_4", text: "In my opinion, the app provided a satisfactory resolution." },
+      ]
+    },
+    {
+      label: "Brand Loyalty",
+      questions: [
+        { id: "BL_1", text: "In the future, I intend to continue using this app for my purchases." },
+        { id: "BL_2", text: "I would choose this app again, even if other options are available." },
+        { id: "BL_3", text: "I remain loyal to this app despite the service failure I experienced." },
+        { id: "BL_4", text: "Overall, I see myself as a long-term user of this app." },
+      ]
+    },
+    {
+      label: "Switching Intention",
+      questions: [
+        { id: "SI_1", text: "After this experience, I am seriously considering switching to a competing app." },
+        { id: "SI_2", text: "I am likely to try a competitor app for my next order." },
+        { id: "SI_3", text: "I would discontinue using this app if a better alternative were easily available." },
+        { id: "SI_4", text: "My confidence in this app has declined enough that I may stop using it." },
+      ]
+    },
+    {
+      label: "Word of Mouth",
+      questions: [
+        { id: "WOM_1", text: "I would recommend this app to my friends and family." },
+        { id: "WOM_2", text: "I would spread positive word-of-mouth based on how my complaint was handled." },
+        { id: "WOM_3", text: "I am likely to tell others about the good recovery effort made by the app." },
+        { id: "WOM_4", text: "I would actively discourage others from using this app." },
+      ]
+    },
+  ];
+
+  const scaleLabels = [
+    "Strongly\nDisagree",
+    "Disagree",
+    "Neutral",
+    "Agree",
+    "Strongly\nAgree"
+  ];
+
+  // ── BUILD LIKERT MATRIX ───────────────────────────────────────────────────
+  let globalQ = 0;
+  const container = document.getElementById('likert-container');
+
+  subscales.forEach((subscale, si) => {
+    // Subscale divider (not for first)
+    if (si > 0) {
+      const div = document.createElement('div');
+      div.className = 'subscale-divider';
+      div.innerHTML = `<span>${subscale.label}</span>`;
+      container.appendChild(div);
+    } else {
+      // First: still show label
+      const div = document.createElement('div');
+      div.className = 'subscale-divider';
+      div.style.marginTop = '0';
+      div.innerHTML = `<span>${subscale.label}</span>`;
+      container.appendChild(div);
+    }
+
+    // Matrix group
+    const mg = document.createElement('div');
+    mg.className = 'matrix-group';
+
+    // Header row
+    const header = document.createElement('div');
+    header.className = 'matrix-header';
+    header.innerHTML = `<span>Statement</span>` +
+      scaleLabels.map(l => `<span>${l.replace('\n','<br>')}</span>`).join('');
+    mg.appendChild(header);
+
+    subscale.questions.forEach(q => {
+      globalQ++;
+      const num = globalQ;
+
+      const row = document.createElement('div');
+      row.className = 'matrix-row';
+      row.dataset.name = q.id;
+
+      // Question text cell
+      const qCell = document.createElement('div');
+      qCell.className = 'matrix-q-text';
+      qCell.innerHTML = `<span class="q-num">${num}.</span>${q.text}`;
+      row.appendChild(qCell);
+
+      // Desktop: 5 radio cells; Mobile: grouped inside a flex row
+      const radioWrap = document.createElement('div');
+      radioWrap.className = 'radio-group-mobile';
+      radioWrap.style.display = 'contents'; // default: grid cells
+
+      for (let v = 1; v <= 5; v++) {
+        const cell = document.createElement('div');
+        cell.className = 'matrix-cell';
+
+        const radio = document.createElement('input');
+        radio.type = 'radio';
+        radio.name = q.id;
+        radio.value = v;
+        radio.required = true;
+        radio.setAttribute('aria-label', `${scaleLabels[v-1]} for question ${num}`);
+
+        const mobLbl = document.createElement('span');
+        mobLbl.className = 'mob-label';
+        mobLbl.textContent = v;
+
+        cell.appendChild(radio);
+        cell.appendChild(mobLbl);
+        row.appendChild(cell);
+      }
+
+      mg.appendChild(row);
+    });
+
+    container.appendChild(mg);
+  });
+  
+  // ── SCREENER LOGIC ───────────────────────────────────────────────────────
+  const recentUsage = document.getElementById('Recent_Usage');
+  const failureExp = document.getElementById('Failure_Experience');
+  const likertCard = document.getElementById('likert-card');
+  const submitSection = document.getElementById('submit-section');
+  const screenerRejection = document.getElementById('screener-rejection');
+
+  function checkEligibility() {
+    if (recentUsage.value && failureExp.value) {
+      if (recentUsage.value === "Zepto, Blinkit, or Swiggy Instamart" && 
+          failureExp.value === "Yes, experienced issue AND contacted support") {
+        likertCard.style.display = 'block';
+        submitSection.style.display = 'block';
+        screenerRejection.style.display = 'none';
+      } else {
+        likertCard.style.display = 'none';
+        submitSection.style.display = 'none';
+        screenerRejection.style.display = 'block';
+      }
+    } else {
+      likertCard.style.display = 'none';
+      submitSection.style.display = 'none';
+      screenerRejection.style.display = 'none';
+    }
+    updateProgress();
+  }
+
+  recentUsage.addEventListener('change', checkEligibility);
+  failureExp.addEventListener('change', checkEligibility);
+
+  // ── PROGRESS TRACKER ─────────────────────────────────────────────────────
+  const totalRadioGroups = globalQ;
+  const form = document.getElementById('survey-form');
+
+  function updateProgress() {
+    const selects = form.querySelectorAll('select[required]');
+    let answered = 0;
+    
+    // Only count selects that are currently visible
+    let visibleSelects = 0;
+    selects.forEach(s => { 
+        if(s.offsetParent !== null) {
+            visibleSelects++;
+            if (s.value) answered++; 
+        }
+    });
+
+    let total = visibleSelects;
+
+    // Only count radio buttons if the likert card is visible
+    if(likertCard.style.display === 'block') {
+        const radioNames = [...new Set([...form.querySelectorAll('input[type="radio"]')].map(r => r.name))];
+        radioNames.forEach(name => {
+          if (form.querySelector(`input[name="${name}"]:checked`)) answered++;
+        });
+        total += radioNames.length;
+    }
+
+    const pct = total === 0 ? 0 : Math.round((answered / total) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+  }
+
+  form.addEventListener('change', updateProgress);
+  updateProgress();
+
+  // ── FORM SUBMISSION ───────────────────────────────────────────────────────
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaAZOTWWMCH_5NlDUJJgvmbSmFvl5IsR6LL8NH8lrympjsp6lm5v04WO9z5k9s2mMB/exec";
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    let valid = true;
+
+    // Validate required selects
+    form.querySelectorAll('select[required]').forEach(sel => {
+      const field = sel.closest('.field');
+      if (!sel.value) {
+        field.classList.add('has-error');
+        valid = false;
+      } else {
+        field.classList.remove('has-error');
+      }
+    });
+
+    // Validate radio groups (only if visible)
+    if(likertCard.style.display === 'block') {
+        const radioNames = [...new Set([...form.querySelectorAll('input[type="radio"]')].map(r => r.name))];
+        radioNames.forEach(name => {
+          const row = form.querySelector(`.matrix-row[data-name="${name}"]`);
+          if (!form.querySelector(`input[name="${name}"]:checked`)) {
+            row && row.classList.add('row-error');
+            valid = false;
+          } else {
+            row && row.classList.remove('row-error');
+          }
+        });
+    }
+
+    if (!valid) {
+      // Scroll to first error
+      const firstErr = form.querySelector('.has-error, .row-error');
+      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    // Collect data
+    const data = {};
+    new FormData(form).forEach((val, key) => { data[key] = val; });
+
+    // Submit
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Submitting…';
+
+    try {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+    } catch (_) {
+      // no-cors: response is opaque, treat as success
+    }
+
+    // Show thank-you
+    form.style.display = 'none';
+    document.getElementById('thank-you').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  </script>
+</body>
+</html>
