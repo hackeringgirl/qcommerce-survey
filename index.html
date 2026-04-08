@@ -422,13 +422,11 @@
 </head>
 <body>
 
-  <div class="top-banner">
-    🔒 This academic survey is <strong>securely powered by Google Apps Script</strong> and hosted via <strong>GitHub Pages</strong>. Your responses are anonymous.
-  </div>
+
 
   <header>
     <div class="institute-tag">IIT Mandi · MBA Research</div>
-    <h1>Service Recovery in Q-Commerce</h1>
+    <h1>Service Recovery in Q-Commerce: A Consumer Perception Study</h1>
     <p>This survey is part of an academic research project. It takes approximately 5–7 minutes to complete. All responses are confidential.</p>
   </header>
 
@@ -502,13 +500,29 @@
           <span class="error-msg">Please select an option.</span>
         </div>
 
+        <div class="field" id="failure-field" style="display:none;">
+          <label class="field-label" for="Failure_Experience">During this time, did you experience any service issues (e.g., late delivery, missing/damaged items) and contact their customer support? <span class="opt">*</span></label>
+          <select id="Failure_Experience" name="Failure_Experience">
+            <option value="">— Select an option —</option>
+            <option value="Yes, contacted support">Yes, I experienced an issue AND contacted support</option>
+            <option value="Yes, did not contact support">Yes, I experienced an issue but DID NOT contact support</option>
+            <option value="No issues">No, I have not experienced any issues</option>
+          </select>
+          <span class="error-msg">Please select an option.</span>
+        </div>
 
+      </div>
+
+      <!-- ── SCREENER REJECTION ── -->
+      <div id="screener-rejection">
+        <strong>Thank you for your interest!</strong>
+        <p>Unfortunately, this survey is specifically for respondents who have used Zepto, Blinkit, or Swiggy Instamart <em>and</em> contacted customer support after a service issue. Your profile does not match the criteria at this time — but we appreciate your willingness to participate! 🙏</p>
       </div>
 
 
 
       <!-- ── PART 3: LIKERT SCALE ── -->
-      <div class="card" id="likert-card">
+      <div class="card" id="likert-card" style="display:none;">
         <div class="section-label">
           <span class="pill">Part 3</span>
           <h2>Your Perceptions &amp; Experience</h2>
@@ -519,7 +533,7 @@
       </div>
 
       <!-- ── SUBMIT ── -->
-      <div id="submit-section" style="display:block;">
+      <div id="submit-section" style="display:none;">
         <p class="submit-note">By submitting, you confirm your participation is voluntary and your responses are anonymous.</p>
         <button type="submit" id="submit-btn">Submit My Responses</button>
       </div>
@@ -527,7 +541,9 @@
     </form>
   </div>
 
-
+  <footer>
+    🔒 This academic survey is securely powered by <a href="https://workspace.google.com/products/apps-script/" target="_blank">Google Apps Script</a> and hosted via <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>. &nbsp;|&nbsp; IIT Mandi MBA Research &nbsp;|&nbsp; All responses are anonymous.
+  </footer>
 
   <script>
   // ── QUESTION DATA ─────────────────────────────────────────────────────────
@@ -657,6 +673,54 @@
     container.appendChild(mg);
   });
 
+  // ── SCREENER BRANCHING ────────────────────────────────────────────────────
+  const recentUsageEl      = document.getElementById('Recent_Usage');
+  const failureFieldEl     = document.getElementById('failure-field');
+  const failureEl          = document.getElementById('Failure_Experience');
+  const rejectionEl        = document.getElementById('screener-rejection');
+  const likertCardEl       = document.getElementById('likert-card');
+  const submitSectionEl    = document.getElementById('submit-section');
+
+  function applyScreenerLogic() {
+    const usage   = recentUsageEl.value;
+    const failure = failureEl.value;
+
+    // Step 1 – show/hide Failure_Experience question
+    // Show for any app user; only hide if no apps used or nothing selected
+    const usedAnyApp =
+      usage === 'Zepto, Blinkit, or Swiggy Instamart' ||
+      usage === 'Other delivery apps';
+
+    if (usedAnyApp) {
+      failureFieldEl.style.display = 'block';
+      failureEl.required = true;
+    } else {
+      failureFieldEl.style.display = 'none';
+      failureEl.required = false;
+      failureEl.value = '';
+    }
+
+    // Step 2 – qualify or reject
+    // Qualify: used ANY app AND contacted support
+    const qualified =
+      usedAnyApp && failure === 'Yes, contacted support';
+
+    likertCardEl.style.display    = qualified ? 'block' : 'none';
+    submitSectionEl.style.display = qualified ? 'block' : 'none';
+
+    // Reject only when a final disqualifying answer is given
+    const disqualified =
+      usage === "I haven't used quick delivery apps recently" ||
+      (usedAnyApp && failure !== '' && failure !== 'Yes, contacted support');
+
+    rejectionEl.style.display = disqualified ? 'block' : 'none';
+
+    updateProgress();
+  }
+
+  recentUsageEl.addEventListener('change', applyScreenerLogic);
+  failureEl.addEventListener('change', applyScreenerLogic);
+
   // ── PROGRESS TRACKER ─────────────────────────────────────────────────────
   const form = document.getElementById('survey-form');
 
@@ -664,15 +728,19 @@
     let answered = 0, total = 0;
 
     form.querySelectorAll('select[required]').forEach(s => {
+      if (s.closest('[style*="display:none"]') || s.closest('[style*="display: none"]')) return;
       total++;
       if (s.value) answered++;
     });
 
-    const radioNames = [...new Set([...form.querySelectorAll('input[type="radio"]')].map(r => r.name))];
-    radioNames.forEach(name => {
-      total++;
-      if (form.querySelector(`input[name="${name}"]:checked`)) answered++;
-    });
+    // Only count Likert radios if Part 3 is visible
+    if (likertCardEl.style.display !== 'none') {
+      const radioNames = [...new Set([...form.querySelectorAll('input[type="radio"]')].map(r => r.name))];
+      radioNames.forEach(name => {
+        total++;
+        if (form.querySelector(`input[name="${name}"]:checked`)) answered++;
+      });
+    }
 
     const pct = total === 0 ? 0 : Math.round((answered / total) * 100);
     document.getElementById('progress-fill').style.width = pct + '%';
@@ -683,6 +751,8 @@
 
   // ── FORM SUBMISSION ───────────────────────────────────────────────────────
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwRGly8zlYbYfRPnMMEtKF9gevT9mA6mJvFQsV4o_fbyydGkDMnncj_OShPERq9Fjr/exec"
+  form.addEventListener('submit', async function (e) {;
+
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     let valid = true;
@@ -690,6 +760,7 @@
     // Validate visible selects
     form.querySelectorAll('select[required]').forEach(sel => {
       const field = sel.closest('.field');
+      if (!field || field.style.display === 'none') return;
       if (!sel.value) {
         field.classList.add('has-error');
         valid = false;
@@ -698,17 +769,19 @@
       }
     });
 
-    // Validate radio groups
-    const radioNames = [...new Set([...form.querySelectorAll('input[type="radio"]')].map(r => r.name))];
-    radioNames.forEach(name => {
-      const row = form.querySelector(`.matrix-row[data-name="${name}"]`);
-      if (!form.querySelector(`input[name="${name}"]:checked`)) {
-        row && row.classList.add('row-error');
-        valid = false;
-      } else {
-        row && row.classList.remove('row-error');
-      }
-    });
+    // Validate radio groups only if Part 3 is visible
+    if (likertCardEl.style.display !== 'none') {
+      const radioNames = [...new Set([...form.querySelectorAll('input[type="radio"]')].map(r => r.name))];
+      radioNames.forEach(name => {
+        const row = form.querySelector(`.matrix-row[data-name="${name}"]`);
+        if (!form.querySelector(`input[name="${name}"]:checked`)) {
+          row && row.classList.add('row-error');
+          valid = false;
+        } else {
+          row && row.classList.remove('row-error');
+        }
+      });
+    }
 
     if (!valid) {
       const firstErr = form.querySelector('.has-error, .row-error');
